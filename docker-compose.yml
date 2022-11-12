@@ -4,63 +4,93 @@ version: '2'
 services:
   zookeeper-1:
     image: confluentinc/cp-zookeeper:latest
-    networks:
+    networks: 
       - network
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zookeeper-1:2888:3888;zookeeper-2:2888:3888;zookeeper-3:2888:3888
     ports:
       - 22181:2181
-  
+    restart: "unless-stopped"
+  zookeeper-2:
+    image: confluentinc/cp-zookeeper:latest
+    networks: 
+      - network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_SERVERS: zookeeper-1:2888:3888;zookeeper-2:2888:3888;zookeeper-3:2888:3888
+    ports:
+      - 32181:2181 
+    restart: "unless-stopped"
+  zookeeper-3:
+    image: confluentinc/cp-zookeeper:latest
+    networks: 
+      - network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_SERVERS: zookeeper-1:2888:3888;zookeeper-2:2888:3888;zookeeper-3:2888:3888
+    ports:
+      - 42181:2181 
+    restart: "unless-stopped"
   kafka-1:
     image: confluentinc/cp-kafka:latest
     container_name: 3219-otot-d-container-1
-    networks:
+    networks: 
       - network
     depends_on:
       - zookeeper-1
-
+      - zookeeper-2
+      - zookeeper-3
     ports:
       - 29092:29092
+    restart: "unless-stopped"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-
   kafka-2:
     image: confluentinc/cp-kafka:latest
     container_name: 3219-otot-d-container-2
-    networks:
+    networks: 
       - network
     depends_on:
       - zookeeper-1
-
+      - zookeeper-2
+      - zookeeper-3
     ports:
       - 39092:39092
+    restart: "unless-stopped"
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,PLAINTEXT_HOST://localhost:39092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
-
   kafka-3:
     image: confluentinc/cp-kafka:latest
     container_name: 3219-otot-d-container-3
-    networks:
+    networks: 
       - network
     depends_on:
       - zookeeper-1
-
+      - zookeeper-2
+      - zookeeper-3
     ports:
       - 49092:49092
+    restart: "unless-stopped"
     environment:
       KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,PLAINTEXT_HOST://localhost:49092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
